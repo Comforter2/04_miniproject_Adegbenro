@@ -1,7 +1,7 @@
 ---
 title: "Mini-project instructions"
 subtitle: "COTTON YIELD"
-author: "YOUR FULL NAME"
+author: "COMFORT ADEGBENRO"
 format:
   html:
     code-fold: false
@@ -47,13 +47,69 @@ Once you arrive at a final selection, **take a screen shot** of all selected var
 Here's where you will load your packages and load your data.  
 Follow a similar structure as we did in class.  
 
+## Loading packages  
+```{r }
+#| message: false
+#| warning: false
+
+library(tidyverse)
+library(readxl)
+library(dlookr)
+library(janitor)
+library(ggthemes)
+
+```
+
+## Importing data  
+```{r soy}
+#| message: false
+#| warning: false
+
+cotton_yield <- read_csv("../data/cotton_yield.csv")
+```
+
 # EDA  
 You may need to to some exploratory data analysis (EDA) to make sure you have the correct data (column names, variable classes, etc.).  
 Follow a similar structure as we did in class, both for the summary and spatial scripts.  
 
+## Print `cotton_yield`  
+```{r}
+head(cotton_yield) # try to understand the data and what is in each column, showing only few rows here.
+```
+The commodity of concern is Upland cotton and the category is yield. There are 10,180 rows and 21 columns of data. Some of the columns are all NAs meaning the data is not available. These columns will be subsequently removed.The column we are mostly concerned with is the 'value', showing the yield of Upland cotton in lb/acre. Among the counties, we have "OTHER COUNTIES" and "OTHER (COMBINED) COUNTIES".
+
+## `cotton_yield` summary  
+```{r }
+summary(cotton_yield)
+```
+
+## Exploring column classes and distinct cases  
+```{r }
+cotton_yield %>%
+  diagnose() #gives you a quick overview of the column classes, distinct cases, and missingness
+```
+
+```{r}
+cotton_yield %>%
+  distinct(County) %>%
+  arrange(County) #helps to see the counties in alphabetical order
+```
+
 # Wrangling  
 Based on your EDA, you may need to perform data wrangling operations to get your data ready to be used.  
 Follow a similar structure as we did in class, both for the summary and spatial scripts.    
+
+```{r cotton_yield_w}
+cotton_yield_w <- cotton_yield %>%
+  clean_names() %>%
+  
+  # Selecting desired variables
+  select(year, county, 
+         yield_acre = value)
+
+cotton_yield_w
+```
+
 
 # Questions 
 Below each question, create chunk(s) to write code to find the answer.  

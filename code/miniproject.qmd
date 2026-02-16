@@ -57,11 +57,14 @@ library(readxl)
 library(dlookr)
 library(janitor)
 library(ggthemes)
-
+library(sf)
+library(USAboundaries)
+library(mapview)
+library(viridis)
 ```
 
 ## Importing data  
-```{r soy}
+```{r cotton}
 #| message: false
 #| warning: false
 
@@ -112,7 +115,10 @@ cotton_yield_w <- cotton_yield %>%
          yield_lbacre = value) %>%
   
   # filter out the rows with other counties and other 9combined) counties
-  filter(!(county %in% c("OTHER COUNTIES", "OTHER (COMBINED) COUNTIES")))
+  filter(!(county %in% c("OTHER COUNTIES", "OTHER (COMBINED) COUNTIES"))) %>%
+ 
+  # change lettercase
+  mutate(county = str_to_title(county)) 
 
 cotton_yield_w
 ```
@@ -231,7 +237,7 @@ The most recent year is 2024, and the highest cotton yield in 2024 was 1061 lb/a
 
 ```{r}
 cotton_yield_w %>%
-  filter(county == "SEMINOLE") %>%
+  filter(county == "Seminole") %>%
   ggplot(aes(x = year,
              y = yield_lbacre)) + 
   geom_line() +
@@ -256,7 +262,7 @@ The most recent year is 2024, and the lowest cotton yield in this year was 452 l
 
 ```{r}
 cotton_yield_w %>%
-  filter(county == "LANIER") %>%
+  filter(county == "Lanier") %>%
   ggplot(aes(x = year,
              y = yield_lbacre)) + 
   geom_line() +
@@ -268,12 +274,128 @@ Cotton yield in the Lanier county shows an increasing treand, rising from about 
 
 ## Plot category values over time for both of the counties above.  
 
+```{r}
+cotton_yield_w %>%
+  filter(county %in% c("Seminole", "Lanier")) %>%
+  ggplot(aes(x = year,
+             y = yield_lbacre, 
+             colour = county,
+             shape = county)) +
+  geom_line() +
+  geom_point() +
+  labs(x = "Year",
+       y = "Cotton Yield (lb/acre)")
+```
+Both counties show a strong long-term increase in cotton yield, with much higher values and greater year-to-year variability after about 1980. Seminole county consistently records higher yields than Lanier in most years.
+
 ## Plot the state-wide summarized (e.g., summed if production, planted/harvested area, number of gins, and average if yield) category value on each year. Around what years was it highest? And lowest? 
+
+```{r }
+cotton_yield_w %>%
+  group_by(year) %>%
+  summarise(meanyield = mean(yield_lbacre)) %>%
+  ggplot(aes(x = year,
+             y = meanyield)) +
+  geom_line(color = "blue") +
+  geom_point()
+
+```
 
 ## Create a publication-ready static map with your category values for all counties in Georgia for the most recent reported year.  Make sure your axis and legend labels are professional and include units if needed. Add a title to your map. Add county names.  
 
+### Creating geospatial data 
 
-## Create an interactive map with your category values for all counties in Georgia for the most recent reported year.  
+```{r}
+ga_co = us_counties(states = "Georgia")
+
+# Checking class
+class(ga_co)
+
+# Exploring the object
+ga_co 
+
+# Quick plot
+ggplot() +
+  geom_sf(data = ga_co)
+
+```
+
+### County geospatial data  
+```{r ga_co_w}
+ga_co_w = ga_co %>%
+  select(county = name, geometry)
+
+head(ga_co_w, 3)    
+```
+
+### Joining NASS and county  
+```{r soy_sp}
+cotton_sp = cotton_yield_w %>%
+  left_join(ga_co_w) %>%
+  st_as_sf()
+
+head(cotton_sp, 3)
+```
+
+
+## Make map above publication ready  
+```{r}
+#| message: false
+#| warning: false
+
+cotton_sp %>%
+  filter(year == 2024) %>%
+  ggplot()+
+  geom_sf(data = ga_co_w,
+          size = .2)+
+  geom_sf(data = ~., aes(fill = yield_lbacre),
+          size = .2
+  ) +
+  # Selecting a colorblind-safe palette
+  scale_fill_viridis_c(option = "C") +
+
+  # Changing fill legend label, giving a title
+  labs(fill = "Yield \n(lb/acre)",
+       title = "County-level Cotton Yield in 2024") +
+  
+  # Adding county names
+  geom_sf_text(aes(label = county, fontface = "bold"),
+                   size = 2,
+                   colour = "white") +
+
+  # Changing to a cleaner theme
+  theme_void()
+
+#ggsave("../output/cotton-yield-24.png",
+       #width = 6,
+       #height = 4,
+       #bg = "white")
+
+```
+
+
+## Create an interactive map with your category values for all counties in Georgia for the most recent reported year. 
+
+```{r}
+#| message: false
+#| warning: false
+
+
+cotton_sp_24 <- cotton_sp %>%
+          filter(year == 2024)
+
+mapview(ga_co_w,
+        col.regions = "white",
+        legend = NULL,
+        alpha.regions = 0.1,
+        map.types = "CartoDB.Positron") +
+
+mapview(cotton_sp_24,
+        zcol = "yield_lbacre",
+        alpha.regions = 1,
+        col.regions = plasma(20))
+
+```
 
 
 # Submitting your work  

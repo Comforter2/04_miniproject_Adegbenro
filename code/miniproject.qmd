@@ -82,6 +82,7 @@ The commodity of concern is Upland cotton and the category is yield. There are 1
 ```{r }
 summary(cotton_yield)
 ```
+Some of the columns have NAs which will be further explored using the diagnose() function. Our column of interest (yield=value) ranges from 39 to 1265 lb/acre with no NA.
 
 ## Exploring column classes and distinct cases  
 ```{r }
@@ -94,10 +95,13 @@ cotton_yield %>%
   distinct(County) %>%
   arrange(County) #helps to see the counties in alphabetical order
 ```
+Since county is of interest too, there are 158 distinct counties including the combined counties.
 
 # Wrangling  
 Based on your EDA, you may need to perform data wrangling operations to get your data ready to be used.  
-Follow a similar structure as we did in class, both for the summary and spatial scripts.    
+Follow a similar structure as we did in class, both for the summary and spatial scripts.
+
+Wrangling was performed to clean column names, and to select the columns of interest, and changing the yield column name to yield_lbacre to show its unit.
 
 ```{r cotton_yield_w}
 cotton_yield_w <- cotton_yield %>%
@@ -105,11 +109,40 @@ cotton_yield_w <- cotton_yield %>%
   
   # Selecting desired variables
   select(year, county, 
-         yield_acre = value)
+         yield_lbacre = value) %>%
+  
+  # filter out the rows with other counties and other 9combined) counties
+  filter(!(county %in% c("OTHER COUNTIES", "OTHER (COMBINED) COUNTIES")))
 
 cotton_yield_w
 ```
 
+
+# EDA round 2  
+## Plot production distribution  
+
+```{r }
+ggplot(cotton_yield_w,
+       aes(x = yield_lbacre)) +
+  geom_density() +
+  geom_rug() # adds marks to show where there is a data point on the x-axis
+
+```
+From the density plot, we see that the peak of distribution is a little less than 250 lb/acre, and a few yield values range from 500 to 1265 lb/acre, making the plot right-skewed.
+
+
+## Plot production distribution by year  
+
+```{r }
+ggplot(cotton_yield_w,
+       aes(x = year,
+                  y = yield_lbacre,
+                  group = year)) +
+  geom_boxplot() 
+
+
+```
+From the graph above, there is an upward trend, with an increase in cotton yield over time as the years pass by.
 
 # Questions 
 Below each question, create chunk(s) to write code to find the answer.  
@@ -117,21 +150,121 @@ Then, write a full sentence to answer the question.
 
 ## What were the minimum and maximum years reported on your data?  
 
+```{r}
+#minimum year reported
+cotton_yield_w %>%
+  slice_min(year) %>%
+  head(n=1)
+
+#maximum year reported
+cotton_yield_w %>%
+  slice_max(year) %>%
+  head(n=1)
+```
+The minimum and maximum years reported for the cotton-yield data as seen above and from the summary results are 1928 and 2024, respectively.
+
 ## What were the minimum and maximum values for your category at the county level (e.g., yield, production, area, etc.)? When (what year) and where (what county) did these min and max values occurred?  
 
-## Plot your category values as a density plot. How does the distribution look like (skewed, normal)? Where does the distribution appear to peak related to your category value (look on the x-axis)?  
 
-## Plot your category values as a boxplot over years. Which year(s) seem to have the largest variability?  
+```{r}
+#minimum cotton yield reported, the year and county
+cotton_yield_w %>%
+  slice_min(yield_lbacre) 
+
+#maximum cotton yield reported, the year and county
+cotton_yield_w %>%
+  slice_max(yield_lbacre)
+```
+The minimum cotton yield was 39 lb/acre, and this was recorded in 1977 at the Butts county.
+The maximum yield of cotton was 1265 lb/acre, in 2012 at Jefferson county.
+
+## Plot your category values as a density plot. How does the distribution look like (skewed, normal)? Where does the distribution appear to peak related to your category value (look on the x-axis)? 
+
+
+```{r }
+ggplot(cotton_yield_w,
+       aes(x = yield_lbacre)) +
+  geom_density() +
+  geom_rug() # adds marks to show where there is a data point on the x-axis
+
+```
+From the density plot, we see that the peak of distribution is a little less than 250 lb/acre, and a few yield values range from 500 to 1265 lb/acre, making the distribution right-skewed.
+
+## Plot your category values as a boxplot over years. Which year(s) seem to have the largest variability? 
+
+```{r }
+ggplot(cotton_yield_w,
+       aes(x = year,
+                  y = yield_lbacre,
+                  group = year)) +
+  geom_boxplot() 
+
+```
+The largest variability is seen from approximately the early 1980s to the mid-1990s, where the boxplots display the widest interquartile ranges and longest whiskers, indicating the greatest dispersion in yield.
 
 ## Plot the overall-county average of your category values over time. Around what year (you can eyeball on the plot) was it maximum? And minimum? Is there a trend (increasing over time, decreasing over time, goes up and down without a trend, etc)?  
 
+```{r }
+cotton_yield_w %>%
+  group_by(year) %>%
+  summarise(meanyield = mean(yield_lbacre)) %>%
+  ggplot(aes(x = year,
+             y = meanyield)) +
+  geom_line() +
+  labs(x = "Year",
+       y = "Mean Cotton Yield (lb/acre) per County")
+```
+The overall county average is lowest in around 1931 (~150 lb/acre) and reaches its maximum around 2012 (~1050 lb/acre). There is also a clear long-term increasing trend despite short-term fluctuations.
+
 ## What was the highest category value in the most recent reported year?  
 
-## Plot your category values over time for the highest ranked county in the most recent reported year.  
+```{r}
+cotton_yield_w %>%
+  filter(year == 2024) %>%
+  arrange(desc(yield_lbacre)) %>%
+  head(3)
+```
+
+The most recent year is 2024, and the highest cotton yield in 2024 was 1061 lb/acre at the Seminole county.
+
+## Plot your category values over time for the highest ranked county in the most recent reported year. 
+
+```{r}
+cotton_yield_w %>%
+  filter(county == "SEMINOLE") %>%
+  ggplot(aes(x = year,
+             y = yield_lbacre)) + 
+  geom_line() +
+  geom_point() +
+  labs(x = "Year",
+       y = "Cotton Yield (lb/acre) for Seminole County")
+```
+
+The highest-ranked county is SEMINOLE in the year 2024. The graph above for this county over time, shows a strong long-term increase in yield, with the minimum in the early 1930s and the maximum in the early–mid 2010s, along with several short-term fluctuations.
 
 ## What was the lowest category value in the most recent reported year?  
 
-## Plot your category values over time for the lowest ranked county in the most recent reported year.  
+```{r}
+cotton_yield_w %>%
+  filter(year == 2024) %>%
+  arrange(yield_lbacre) %>%
+  head(3)
+```
+The most recent year is 2024, and the lowest cotton yield in this year was 452 lb/acre at the Lanier county.
+
+## Plot your category values over time for the lowest ranked county in the most recent reported year. 
+
+```{r}
+cotton_yield_w %>%
+  filter(county == "LANIER") %>%
+  ggplot(aes(x = year,
+             y = yield_lbacre)) + 
+  geom_line() +
+  geom_point() +
+  labs(x = "Year",
+       y = "Cotton Yield (lb/acre) for Lanier County")
+```
+Cotton yield in the Lanier county shows an increasing treand, rising from about 120–250 lb/acre in the 1930s to around 600-1000 lb/acre in later years. The highest yields was seen in the early–mid 2010s. There is a sharp rise between the mid-1970s and early 1980s and could be due to missing years in the dataset. Yield also dropped in the most recent year in 2024.
 
 ## Plot category values over time for both of the counties above.  
 

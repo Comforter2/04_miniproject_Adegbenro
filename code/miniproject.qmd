@@ -77,9 +77,9 @@ Follow a similar structure as we did in class, both for the summary and spatial 
 
 ## Print `cotton_yield`  
 ```{r}
-head(cotton_yield) # try to understand the data and what is in each column, showing only few rows here.
+head(cotton_yield, 3) # try to understand the data and what is in each column.
 ```
-The commodity of concern is Upland cotton and the category is yield. There are 10,180 rows and 21 columns of data. Some of the columns are all NAs meaning the data is not available. These columns will be subsequently removed.The column we are mostly concerned with is the 'value', showing the yield of Upland cotton in lb/acre. Among the counties, we have "OTHER COUNTIES" and "OTHER (COMBINED) COUNTIES".
+The commodity of concern is Upland cotton and the category is yield. There are 10,180 rows and 21 columns of data. Some of the columns are all NAs meaning the data is not available. These columns will be subsequently removed. The column we are mostly concerned with is the 'value', showing the yield of Upland cotton in lb/acre. Among the counties, we have "OTHER COUNTIES" and "OTHER (COMBINED) COUNTIES".
 
 ## `cotton_yield` summary  
 ```{r }
@@ -96,7 +96,8 @@ cotton_yield %>%
 ```{r}
 cotton_yield %>%
   distinct(County) %>%
-  arrange(County) #helps to see the counties in alphabetical order
+  arrange(County) %>% #helps to see the counties in alphabetical order
+  head(3)
 ```
 Since county is of interest too, there are 158 distinct counties including the combined counties.
 
@@ -117,38 +118,11 @@ cotton_yield_w <- cotton_yield %>%
   # filter out the rows with other counties and other 9combined) counties
   filter(!(county %in% c("OTHER COUNTIES", "OTHER (COMBINED) COUNTIES"))) %>%
  
-  # change lettercase
+  # change letter case
   mutate(county = str_to_title(county)) 
 
-cotton_yield_w
+head(cotton_yield_w, 3)
 ```
-
-
-# EDA round 2  
-## Plot production distribution  
-
-```{r }
-ggplot(cotton_yield_w,
-       aes(x = yield_lbacre)) +
-  geom_density() +
-  geom_rug() # adds marks to show where there is a data point on the x-axis
-
-```
-From the density plot, we see that the peak of distribution is a little less than 250 lb/acre, and a few yield values range from 500 to 1265 lb/acre, making the plot right-skewed.
-
-
-## Plot production distribution by year  
-
-```{r }
-ggplot(cotton_yield_w,
-       aes(x = year,
-                  y = yield_lbacre,
-                  group = year)) +
-  geom_boxplot() 
-
-
-```
-From the graph above, there is an upward trend, with an increase in cotton yield over time as the years pass by.
 
 # Questions 
 Below each question, create chunk(s) to write code to find the answer.  
@@ -191,8 +165,13 @@ The maximum yield of cotton was 1265 lb/acre, in 2012 at Jefferson county.
 ggplot(cotton_yield_w,
        aes(x = yield_lbacre)) +
   geom_density() +
-  geom_rug() # adds marks to show where there is a data point on the x-axis
-
+  geom_rug() + # adds marks to show where there is a data point on the x-axis
+  theme(
+  axis.title.x = element_text(size = 14, face = "bold"),
+  axis.title.y = element_text(size = 14, face = "bold"),
+  axis.text.x  = element_text(size = 12, face = "bold"),
+  axis.text.y  = element_text(size = 12, face = "bold")
+)
 ```
 From the density plot, we see that the peak of distribution is a little less than 250 lb/acre, and a few yield values range from 500 to 1265 lb/acre, making the distribution right-skewed.
 
@@ -203,8 +182,13 @@ ggplot(cotton_yield_w,
        aes(x = year,
                   y = yield_lbacre,
                   group = year)) +
-  geom_boxplot() 
-
+  geom_boxplot() +
+  theme(
+  axis.title.x = element_text(size = 14, face = "bold"),
+  axis.title.y = element_text(size = 14, face = "bold"),
+  axis.text.x  = element_text(size = 12, face = "bold"),
+  axis.text.y  = element_text(size = 12, face = "bold")
+)
 ```
 The largest variability is seen from approximately the early 1980s to the mid-1990s, where the boxplots display the widest interquartile ranges and longest whiskers, indicating the greatest dispersion in yield.
 
@@ -218,9 +202,15 @@ cotton_yield_w %>%
              y = meanyield)) +
   geom_line() +
   labs(x = "Year",
-       y = "Mean Cotton Yield (lb/acre) per County")
+       y = "Mean Cotton Yield (lb/acre) per County")+
+  theme(
+  axis.title.x = element_text(size = 14, face = "bold"),
+  axis.title.y = element_text(size = 14, face = "bold"),
+  axis.text.x  = element_text(size = 12, face = "bold"),
+  axis.text.y  = element_text(size = 12, face = "bold")
+)
 ```
-The overall county average is lowest in around 1931 (~150 lb/acre) and reaches its maximum around 2012 (~1050 lb/acre). There is also a clear long-term increasing trend despite short-term fluctuations.
+The overall county average is lowest in the early 1930s (~150 lb/acre) and reaches its maximum around 2012 (~1050 lb/acre). There is also a clear long-term increasing trend despite short-term fluctuations.
 
 ## What was the highest category value in the most recent reported year?  
 
@@ -243,10 +233,16 @@ cotton_yield_w %>%
   geom_line() +
   geom_point() +
   labs(x = "Year",
-       y = "Cotton Yield (lb/acre) for Seminole County")
+       y = "Cotton Yield (lb/acre) for Seminole County") +
+  theme(
+  axis.title.x = element_text(size = 14, face = "bold"),
+  axis.title.y = element_text(size = 14, face = "bold"),
+  axis.text.x  = element_text(size = 12, face = "bold"),
+  axis.text.y  = element_text(size = 12, face = "bold")
+)
 ```
 
-The highest-ranked county is SEMINOLE in the year 2024. The graph above for this county over time, shows a strong long-term increase in yield, with the minimum in the early 1930s and the maximum in the early–mid 2010s, along with several short-term fluctuations.
+The highest-ranked county is Seminole in the year 2024. The graph above for this county over time, shows a strong long-term increase in yield, with the minimum in the early 1930s and the maximum in the early–mid 2010s, along with several short-term fluctuations.
 
 ## What was the lowest category value in the most recent reported year?  
 
@@ -268,9 +264,15 @@ cotton_yield_w %>%
   geom_line() +
   geom_point() +
   labs(x = "Year",
-       y = "Cotton Yield (lb/acre) for Lanier County")
+       y = "Cotton Yield (lb/acre) for Lanier County") +
+  theme(
+  axis.title.x = element_text(size = 14, face = "bold"),
+  axis.title.y = element_text(size = 14, face = "bold"),
+  axis.text.x  = element_text(size = 12, face = "bold"),
+  axis.text.y  = element_text(size = 12, face = "bold")
+)
 ```
-Cotton yield in the Lanier county shows an increasing treand, rising from about 120–250 lb/acre in the 1930s to around 600-1000 lb/acre in later years. The highest yields was seen in the early–mid 2010s. There is a sharp rise between the mid-1970s and early 1980s and could be due to missing years in the dataset. Yield also dropped in the most recent year in 2024.
+Cotton yield in the Lanier county shows an increasing trend, rising from about 120–250 lb/acre in the 1930s to around 600-1000 lb/acre in later years. The highest yields was seen in the early–mid 2010s. There is a sharp rise between the mid-1970s and early 1980s and could be due to missing years in the data set. Yield also dropped in the most recent year in 2024.
 
 ## Plot category values over time for both of the counties above.  
 
@@ -284,7 +286,13 @@ cotton_yield_w %>%
   geom_line() +
   geom_point() +
   labs(x = "Year",
-       y = "Cotton Yield (lb/acre)")
+       y = "Cotton Yield (lb/acre)") +
+  theme(
+  axis.title.x = element_text(size = 14, face = "bold"),
+  axis.title.y = element_text(size = 14, face = "bold"),
+  axis.text.x  = element_text(size = 12, face = "bold"),
+  axis.text.y  = element_text(size = 12, face = "bold")
+)
 ```
 Both counties show a strong long-term increase in cotton yield, with much higher values and greater year-to-year variability after about 1980. Seminole county consistently records higher yields than Lanier in most years.
 
@@ -297,22 +305,35 @@ cotton_yield_w %>%
   ggplot(aes(x = year,
              y = meanyield)) +
   geom_line(color = "blue") +
-  geom_point()
-
+  geom_point() +
+  labs(x = "Year",
+       y = "Statewide Mean Cotton Yield (lb/acre)") +
+  theme(
+  axis.title.x = element_text(size = 14, face = "bold"),
+  axis.title.y = element_text(size = 14, face = "bold"),
+  axis.text.x  = element_text(size = 12, face = "bold"),
+  axis.text.y  = element_text(size = 12, face = "bold")
+)
 ```
+
+The overall county average is lowest in the early  1930s (~150 lb/acre) and reaches its maximum around 2012 (~1050 lb/acre). There is also a clear long-term increasing trend despite short-term fluctuations.
 
 ## Create a publication-ready static map with your category values for all counties in Georgia for the most recent reported year.  Make sure your axis and legend labels are professional and include units if needed. Add a title to your map. Add county names.  
 
 ### Creating geospatial data 
 
 ```{r}
-ga_co = us_counties(states = "Georgia")
+#| message: false
+#| warning: false
 
-# Checking class
+ga_co = us_counties(states = "Georgia") %>%
+  select(county = name, geometry)
+
+# Check object class
 class(ga_co)
 
 # Exploring the object
-ga_co 
+head(ga_co, 2) 
 
 # Quick plot
 ggplot() +
@@ -320,25 +341,21 @@ ggplot() +
 
 ```
 
-### County geospatial data  
-```{r ga_co_w}
-ga_co_w = ga_co %>%
-  select(county = name, geometry)
-
-head(ga_co_w, 3)    
-```
 
 ### Joining NASS and county  
 ```{r soy_sp}
+#| message: false
+#| warning: false
+
 cotton_sp = cotton_yield_w %>%
-  left_join(ga_co_w) %>%
+  left_join(ga_co) %>%
   st_as_sf()
 
-head(cotton_sp, 3)
+head(cotton_sp, 2)
 ```
 
 
-## Make map above publication ready  
+### Publication ready map 
 ```{r}
 #| message: false
 #| warning: false
@@ -346,7 +363,7 @@ head(cotton_sp, 3)
 cotton_sp %>%
   filter(year == 2024) %>%
   ggplot()+
-  geom_sf(data = ga_co_w,
+  geom_sf(data = ga_co,
           size = .2)+
   geom_sf(data = ~., aes(fill = yield_lbacre),
           size = .2
@@ -355,24 +372,31 @@ cotton_sp %>%
   scale_fill_viridis_c(option = "C") +
 
   # Changing fill legend label, giving a title
-  labs(fill = "Yield \n(lb/acre)",
+  labs(fill = "Cotton Yield \n(lb/acre)",
        title = "County-level Cotton Yield in 2024") +
   
   # Adding county names
   geom_sf_text(aes(label = county, fontface = "bold"),
-                   size = 2,
+                   size = 4,
                    colour = "white") +
 
   # Changing to a cleaner theme
-  theme_void()
+  theme_void() +
+  
+  # increase size of texts
+   theme(
+    plot.title      = element_text(size = 16, face = "bold", hjust = 0.5),
 
-#ggsave("../output/cotton-yield-24.png",
-       #width = 6,
-       #height = 4,
-       #bg = "white")
+    legend.title    = element_text(size = 13, face = "bold"),
+    legend.text     = element_text(size = 11))
+
+ggsave("../output/cotton-yield-24.png",
+       width = 6,
+       height = 4,
+       bg = "white")
 
 ```
-
+This map shows cotton yield (lb/acre) for all Georgia counties for the year 2024. Yield is represented using a continuous color scale, with darker purple indicating lower yields and bright yellow indicating higher yields. County boundaries are clearly delineated, and county names are labeled for counties with available data. Counties without reported values are shown in gray.The highest yields are concentrated in the southwestern region of the state, while lower yields are seen in south-central and southeastern counties.
 
 ## Create an interactive map with your category values for all counties in Georgia for the most recent reported year. 
 
@@ -384,7 +408,7 @@ cotton_sp %>%
 cotton_sp_24 <- cotton_sp %>%
           filter(year == 2024)
 
-mapview(ga_co_w,
+mapview(ga_co,
         col.regions = "white",
         legend = NULL,
         alpha.regions = 0.1,
@@ -397,6 +421,7 @@ mapview(cotton_sp_24,
 
 ```
 
+The color-scaled interactive map above shows county-level cotton yield (lb/acre) in Georgia for the 2024 year. Users can zoom across the state, hover and click on individual counties to view detailed information, about the county name and its corresponding yield value. As in the static version, higher yields are represented by warmer colors and lower yields by cooler colors, while counties without reported data are not colored.
 
 # Submitting your work  
 Once you have developed all the code and answers, make sure to Render this quarto file.  

@@ -72,7 +72,7 @@ cotton_yield <- read_csv("../data/cotton_yield.csv")
 ```
 
 # EDA  
-You may need to to some exploratory data analysis (EDA) to make sure you have the correct data (column names, variable classes, etc.).  
+You may need to do some exploratory data analysis (EDA) to make sure you have the correct data (column names, variable classes, etc.).  
 Follow a similar structure as we did in class, both for the summary and spatial scripts.  
 
 ## Print `cotton_yield`  
@@ -166,12 +166,13 @@ ggplot(cotton_yield_w,
        aes(x = yield_lbacre)) +
   geom_density() +
   geom_rug() + # adds marks to show where there is a data point on the x-axis
+  theme_clean() +
   theme(
   axis.title.x = element_text(size = 14, face = "bold"),
   axis.title.y = element_text(size = 14, face = "bold"),
   axis.text.x  = element_text(size = 12, face = "bold"),
   axis.text.y  = element_text(size = 12, face = "bold")
-)
+) 
 ```
 From the density plot, we see that the peak of distribution is a little less than 250 lb/acre, and a few yield values range from 500 to 1265 lb/acre, making the distribution right-skewed.
 
@@ -183,6 +184,7 @@ ggplot(cotton_yield_w,
                   y = yield_lbacre,
                   group = year)) +
   geom_boxplot() +
+  theme_clean() +
   theme(
   axis.title.x = element_text(size = 14, face = "bold"),
   axis.title.y = element_text(size = 14, face = "bold"),
@@ -203,6 +205,7 @@ cotton_yield_w %>%
   geom_line() +
   labs(x = "Year",
        y = "Mean Cotton Yield (lb/acre) per County")+
+  theme_clean() +
   theme(
   axis.title.x = element_text(size = 14, face = "bold"),
   axis.title.y = element_text(size = 14, face = "bold"),
@@ -234,6 +237,7 @@ cotton_yield_w %>%
   geom_point() +
   labs(x = "Year",
        y = "Cotton Yield (lb/acre) for Seminole County") +
+  theme_clean() +
   theme(
   axis.title.x = element_text(size = 14, face = "bold"),
   axis.title.y = element_text(size = 14, face = "bold"),
@@ -265,6 +269,7 @@ cotton_yield_w %>%
   geom_point() +
   labs(x = "Year",
        y = "Cotton Yield (lb/acre) for Lanier County") +
+  theme_clean() +
   theme(
   axis.title.x = element_text(size = 14, face = "bold"),
   axis.title.y = element_text(size = 14, face = "bold"),
@@ -287,6 +292,7 @@ cotton_yield_w %>%
   geom_point() +
   labs(x = "Year",
        y = "Cotton Yield (lb/acre)") +
+  theme_clean() +
   theme(
   axis.title.x = element_text(size = 14, face = "bold"),
   axis.title.y = element_text(size = 14, face = "bold"),
@@ -308,6 +314,7 @@ cotton_yield_w %>%
   geom_point() +
   labs(x = "Year",
        y = "Statewide Mean Cotton Yield (lb/acre)") +
+  theme_clean() +
   theme(
   axis.title.x = element_text(size = 14, face = "bold"),
   axis.title.y = element_text(size = 14, face = "bold"),
